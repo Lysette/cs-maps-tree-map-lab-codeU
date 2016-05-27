@@ -73,6 +73,17 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		
 		// the actual search
         // TODO: Fill this in.
+		
+		Node current = root;
+		
+		while (current != null) {
+			if (equals(target, current.key))
+				return current;
+			else if (k.compareTo(current.key) < 0)
+				current = current.left;
+			else 
+				current = current.right;
+		}
         return null;
 	}
 
@@ -92,9 +103,19 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsValue(Object target) {
-		return false;
+		// TODO
+		return containsValueHelper(target, root);
 	}
 
+	private boolean containsValueHelper(Object target, Node current){
+		if (current != null) { 
+			if (equals(target, current.value) || containsValueHelper(target, current.left) 
+					|| containsValueHelper(target, current.right))
+				return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public Set<Map.Entry<K, V>> entrySet() {
 		throw new UnsupportedOperationException();
@@ -118,7 +139,23 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
         // TODO: Fill this in.
+		keySetHelper(root, set);
 		return set;
+	}
+	
+	private void keySetHelper(Node node, Set<K> set) {
+		if (node != null) {
+			// add left
+			keySetHelper(node.left, set);
+			
+			// add current
+			set.add(node.key);
+			
+			// add right
+			keySetHelper(node.right, set);
+		}
+		
+		
 	}
 
 	@Override
@@ -136,7 +173,41 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	private V putHelper(Node node, K key, V value) {
         // TODO: Fill this in.
-        return null;
+
+		// found node
+		if (equals(node.key, key)) {
+			V oldValue = node.value;
+			node.value = value;
+			return oldValue;
+		}
+		// key is less than node key
+		else if (((Comparable<? super K>) key).compareTo(node.key) < 0) {
+			// create left child
+			if (node.left == null) {
+				size++;
+				node.left = new Node(key, value);
+				return null;
+			}
+			
+			// left child exists
+			else {
+				return putHelper(node.left, key, value);
+			}
+		}
+		// key is greater than node key
+		else {
+			// create right child
+			if (node.right == null) {
+				node.right = new Node(key, value);
+				size++;
+				return null;
+			}
+			
+			// right child exists
+			else {
+				return putHelper(node.right, key, value);
+			}
+		}
 	}
 
 	@Override
